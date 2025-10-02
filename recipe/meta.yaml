@@ -6,43 +6,50 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 169423d17799eefbcecd433ffb9a86e85470357977833a14048b58750d4ce26e
 
 build:
-  skip: true  # [py<39]
-  script: {{ PYTHON }} -m pip install . -vv
-  number: 3
+  number: 0
+  skip: true  # [py<310]
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv
 
 requirements:
   build:
+    - {{ stdlib('c') }}
     - {{ compiler('c') }}
-    - {{ stdlib("c") }}
   host:
-    - python
-    - setuptools
-    - setuptools-scm
-    - wheel
-    - numpy
     - pip
+    - python
+    - numpy {{ numpy }}  # [py<39]
+    - numpy >=2.0.0  # [py>=39]
+    - setuptools
+    - setuptools_scm
   run:
     - python
-    - astropy-base >=4.0
-    - dask-core >=2.0
+    - astropy >=4.0
+    - numpy >=1.21
+    - dask >=2.0
 
 test:
   imports:
     - casa_formats_io
-  commands:
-    - pip check
   requires:
     - pip
+    - pytest
+  commands:
+    - pip check
+    - pytest --pyargs casa_formats_io.tests
 
 about:
   home: http://casa-formats-io.readthedocs.org
-  summary: Dask-based reader for CASA data
   license: LGPL-2.0-only
+  license_family: LGPL
   license_file: LICENSE
+  summary: Dask-based reader for CASA data
+  description: A small package implementing I/O for CASA data formats
+  doc_url: http://casa-formats-io.readthedocs.org
+  dev_url: https://github.com/radio-astro-tools/casa-formats-io
 
 extra:
   recipe-maintainers:
